@@ -1,4 +1,12 @@
+import "./globals.css";
+import { Playfair_Display } from "next/font/google";
 import collection from "../collection.config.js";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+});
 
 export const metadata = {
   title: `${collection.name} — Khmer Living Archive`,
@@ -7,19 +15,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
-        style={{
-          margin: 0,
-          backgroundColor: "#14181F",
-          color: "#E8EDF2",
-          fontFamily:
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          minHeight: "100vh",
-        }}
-      >
-        {children}
-      </body>
+    <html lang="en" className={playfair.variable}>
+      <body>{children}</body>
     </html>
   );
 }
