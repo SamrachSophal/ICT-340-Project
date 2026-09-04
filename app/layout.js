@@ -16,6 +16,21 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={playfair.variable}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function(){
+  try {
+    var t = localStorage.getItem("kla-theme");
+    var d = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (t === "dark" || (!t && d)) document.documentElement.classList.add("dark");
+  } catch(e) {}
+})();
+`,
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

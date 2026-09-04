@@ -1,5 +1,6 @@
 import collection from "../collection.config.js";
 import EntryCard from "../components/EntryCard.js";
+import ThemeToggle from "../components/ThemeToggle.js";
 import entries from "../data/entries.js";
 
 export default function Home() {
@@ -10,22 +11,31 @@ export default function Home() {
       style={{
         maxWidth: 840,
         margin: "0 auto",
-        padding: "var(--space-4xl) var(--space-lg)",
+        padding: "var(--space-2xl) var(--space-lg)",
       }}
     >
-      {/* ---- Kicker ---- */}
-      <p
+      {/* ---- Header Row: Kicker + Theme Toggle ---- */}
+      <div
         style={{
-          fontFamily: "'Courier New', monospace",
-          fontSize: "0.75rem",
-          color: "var(--color-accent)",
-          letterSpacing: "0.1em",
-          textTransform: "uppercase",
-          margin: 0,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        Khmer Living Archive
-      </p>
+        <p
+          style={{
+            fontFamily: "'Courier New', monospace",
+            fontSize: "0.75rem",
+            color: "var(--color-accent)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            margin: 0,
+          }}
+        >
+          Khmer Living Archive
+        </p>
+        <ThemeToggle />
+      </div>
 
       {/* ---- Title ---- */}
       <h1
@@ -55,91 +65,13 @@ export default function Home() {
         {collection.description}
       </p>
 
-      {/* ---- Collection Info Cards ---- */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "var(--space-lg)",
-          marginTop: "var(--space-2xl)",
-        }}
-      >
-        <div
-          style={{
-            flex: "1 1 200px",
-            padding: "var(--space-lg)",
-            backgroundColor: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-card)",
-            boxShadow: "var(--shadow-card)",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "'Courier New', monospace",
-              fontSize: "0.6875rem",
-              color: "var(--color-text-muted)",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              margin: 0,
-            }}
-          >
-            Curated by
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-display), Georgia, serif",
-              fontSize: "1rem",
-              fontWeight: 600,
-              color: "var(--color-text-primary)",
-              margin: "var(--space-xs) 0 0",
-            }}
-          >
-            {collection.curator}
-          </p>
-        </div>
-        <div
-          style={{
-            flex: "2 1 300px",
-            padding: "var(--space-lg)",
-            backgroundColor: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-card)",
-            boxShadow: "var(--shadow-card)",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "'Courier New', monospace",
-              fontSize: "0.6875rem",
-              color: "var(--color-text-muted)",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              margin: 0,
-            }}
-          >
-            Source
-          </p>
-          <p
-            style={{
-              fontSize: "0.9375rem",
-              color: "var(--color-text-secondary)",
-              margin: "var(--space-xs) 0 0",
-              lineHeight: 1.6,
-            }}
-          >
-            {collection.source}
-          </p>
-        </div>
-      </div>
-
       {/* ---- Archive Section Header ---- */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: "var(--space-md)",
-          marginTop: "var(--space-3xl)",
+          marginTop: "var(--space-2xl)",
           marginBottom: "var(--space-xl)",
         }}
       >
@@ -173,7 +105,7 @@ export default function Home() {
         />
       </div>
 
-      {/* ---- Featured Entry ---- */}
+      {/* ---- Featured Entry (full-width hero) ---- */}
       <EntryCard
         key={first.title}
         title={first.title}

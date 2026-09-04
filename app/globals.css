@@ -4,7 +4,7 @@
    ============================================================== */
 
 :root {
-  /* ---- Colors ---- */
+  /* ---- Colors (Light — Family House) ---- */
   --color-bg:            #F5F0E8;
   --color-surface:       #FFFFFF;
   --color-surface-hover: #FDF9F2;
@@ -15,6 +15,7 @@
   --color-accent-hover:  #B33622;
   --color-border:        #E0D5C3;
   --color-border-strong: #C9BBA5;
+  --color-focus:         #C8412B;
 
   /* ---- Spacing ---- */
   --space-xs:   4px;
@@ -37,6 +38,24 @@
   --transition-base: 200ms ease;
 }
 
+/* ---- Dark Theme (same archive at night) ---- */
+.dark {
+  --color-bg:            #1C1814;
+  --color-surface:       #2A2520;
+  --color-surface-hover: #322C26;
+  --color-text-primary:  #E8DFD3;
+  --color-text-secondary:#A89B87;
+  --color-text-muted:    #7A6B56;
+  --color-accent:        #D64F3A;
+  --color-accent-hover:  #E55A44;
+  --color-border:        #3A342E;
+  --color-border-strong: #4A433B;
+  --color-focus:         #D64F3A;
+
+  --shadow-card:       0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 /* ---------- Reset & Base ---------- */
 *,
 *::before,
@@ -52,6 +71,8 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-base),
+              color var(--transition-base);
 }
 
 /* ---------- Entry Grid ---------- */
