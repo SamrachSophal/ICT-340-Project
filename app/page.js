@@ -1,11 +1,9 @@
 import collection from "../collection.config.js";
-import EntryCard from "../components/EntryCard.js";
+import SearchableEntryList from "../components/SearchableEntryList.js";
 import ThemeToggle from "../components/ThemeToggle.js";
 import entries from "../data/entries.js";
 
 export default function Home() {
-  const [first, ...rest] = entries;
-
   return (
     <main
       style={{
@@ -105,30 +103,8 @@ export default function Home() {
         />
       </div>
 
-      {/* ---- Featured Entry (full-width hero) ---- */}
-      <EntryCard
-        key={first.title}
-        title={first.title}
-        description={first.description}
-        contributor={first.contributor}
-        place={first.place}
-        index={1}
-        featured
-      />
-
-      {/* ---- Remaining Entries Grid ---- */}
-      <div className="entry-grid" style={{ marginTop: "var(--space-lg)" }}>
-        {rest.map((entry, i) => (
-          <EntryCard
-            key={entry.title}
-            title={entry.title}
-            description={entry.description}
-            contributor={entry.contributor}
-            place={entry.place}
-            index={i + 2}
-          />
-        ))}
-      </div>
+      {/* ---- Search + Entries ---- */}
+      <SearchableEntryList entries={entries} />
 
       {/* ---- Footer ---- */}
       <footer
