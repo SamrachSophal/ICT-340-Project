@@ -45,7 +45,7 @@ export default function EntryCard({
   description,
   contributor,
   place,
-  index,
+  year,
   featured = false,
 }) {
   const [hovered, setHovered] = useState(false);
@@ -59,6 +59,23 @@ export default function EntryCard({
     transition: "var(--transition-base)",
     cursor: "default",
   };
+
+  const metaRow = (
+    <div style={s.meta}>
+      <div>
+        <p style={s.label}>PLACE</p>
+        <p style={s.value}>{place}</p>
+      </div>
+      <div>
+        <p style={s.label}>YEAR</p>
+        <p style={s.value}>{year}</p>
+      </div>
+      <div>
+        <p style={s.label}>CONTRIBUTOR</p>
+        <p style={s.value}>{contributor}</p>
+      </div>
+    </div>
+  );
 
   if (featured) {
     return (
@@ -87,9 +104,7 @@ export default function EntryCard({
             borderBottomLeftRadius: "var(--radius-card)",
           }}
         />
-        <span style={s.number}>
-          {String(index).padStart(2, "0")} — FEATURED
-        </span>
+        <span style={s.number}>{year} — FEATURED</span>
         <h2
           style={{
             fontFamily: "var(--font-display), Georgia, serif",
@@ -103,16 +118,7 @@ export default function EntryCard({
           {title}
         </h2>
         <p style={s.description}>{description}</p>
-        <div style={s.meta}>
-          <div>
-            <p style={s.label}>PLACE</p>
-            <p style={s.value}>{place}</p>
-          </div>
-          <div>
-            <p style={s.label}>CONTRIBUTOR</p>
-            <p style={s.value}>{contributor}</p>
-          </div>
-        </div>
+        {metaRow}
       </article>
     );
   }
@@ -130,9 +136,7 @@ export default function EntryCard({
       onMouseLeave={() => setHovered(false)}
       role="article"
     >
-      <span style={s.number}>
-        {String(index).padStart(2, "0")}
-      </span>
+      <span style={s.number}>{year}</span>
       <h2
         style={{
           fontFamily: "var(--font-display), Georgia, serif",
@@ -146,16 +150,7 @@ export default function EntryCard({
         {title}
       </h2>
       <p style={s.description}>{description}</p>
-      <div style={s.meta}>
-        <div>
-          <p style={s.label}>PLACE</p>
-          <p style={s.value}>{place}</p>
-        </div>
-        <div>
-          <p style={s.label}>CONTRIBUTOR</p>
-          <p style={s.value}>{contributor}</p>
-        </div>
-      </div>
+      {metaRow}
     </article>
   );
 }

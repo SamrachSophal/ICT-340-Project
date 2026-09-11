@@ -1,6 +1,8 @@
 import "./globals.css";
+import { Suspense } from "react";
 import { Playfair_Display } from "next/font/google";
 import collection from "../collection.config.js";
+import Nav from "../components/Nav.js";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -31,7 +33,12 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <Suspense fallback={null}>
+          <Nav />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }
