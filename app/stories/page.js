@@ -1,4 +1,3 @@
-import collection from "../../collection.config.js";
 import EntryCard from "../../components/EntryCard.js";
 import entries from "../../data/entries.js";
 
@@ -7,10 +6,22 @@ export default async function StoriesPage({ searchParams }) {
   const q = typeof params.q === "string" ? params.q.trim() : "";
   const query = q.toLowerCase();
 
-  const sorted = [...entries].sort((a, b) => a.year - b.year);
-  const list = query
-    ? sorted.filter((entry) => entry.title.toLowerCase().includes(query))
-    : sorted;
+  /* Filter entries by search query (title only, case-insensitive). */
+  const filtered = query
+    ? entries.filter((entry) => entry.title.toLowerCase().includes(query))
+    : entries;
+
+  /* Group filtered entries by year, preserving original array order. */
+  const grouped = {};
+  for (const entry of filtered) {
+    if (!grouped[entry.year]) grouped[entry.year] = [];
+    grouped[entry.year].push(entry);
+  }
+
+  /* Sort years descending (newest first). */
+  const years = Object.keys(grouped)
+    .map(Number)
+    .sort((a, b) => b - a);
 
   return (
     <main
@@ -52,7 +63,7 @@ export default async function StoriesPage({ searchParams }) {
           fontSize: "1.125rem",
           color: "var(--color-text-secondary)",
           lineHeight: 1.7,
-          margin: 0,
+          margin: "0 0 var(--space-2xl)",
           maxWidth: "65ch",
         }}
       >
@@ -61,11 +72,10 @@ export default async function StoriesPage({ searchParams }) {
           : "A timeline of family memories, from 2010 to today."}
       </p>
 
-      {list.length === 0 ? (
+      {years.length === 0 ? (
         <div
           role="status"
           style={{
-            marginTop: "var(--space-2xl)",
             padding: "var(--space-2xl) var(--space-lg)",
             textAlign: "center",
             backgroundColor: "var(--color-surface)",
@@ -82,7 +92,7 @@ export default async function StoriesPage({ searchParams }) {
               color: "var(--color-text-primary)",
             }}
           >
-            No stories match "{q}"
+            No stories match &ldquo;{q}&rdquo;
           </p>
           <p
             style={{
@@ -92,30 +102,28 @@ export default async function StoriesPage({ searchParams }) {
               lineHeight: 1.6,
             }}
           >
-            Search checks story titles only — try a Khmer or English name, like
-            បុណ្យ or "new year".
+            Try a Khmer or English title, like បុណ្យ or &ldquo;new year&rdquo;.
           </p>
         </div>
       ) : (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-lg)",
-            marginTop: "var(--space-2xl)",
-          }}
-        >
-          {list.map((entry) => (
-            <EntryCard
-              key={entry.title}
-              title={entry.title}
-              description={entry.description}
-              contributor={entry.contributor}
-              place={entry.place}
-              year={entry.year}
-            />
-          ))}
-        </div>
+        /* Each year gets its own independent horizontal rail. */
+        years.map((year) => (
+          <section key={year} className="stories-year">
+            <h2 className="stories-year-heading">{year}</h2>
+            <div className="stories-card-rail">
+              {grouped[year].map((entry) => (
+                <EntryCard
+                  key={entry.id}
+                  title={entry.title}
+                  description={entry.description}
+                  contributor={entry.contributor}
+                  place={entry.place}
+                  year={entry.year}
+                />
+              ))}
+            </div>
+          </section>
+        ))
       )}
 
       <footer
