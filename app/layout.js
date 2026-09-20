@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Suspense } from "react";
 import { Playfair_Display } from "next/font/google";
+import Script from "next/script";
 import collection from "../collection.config.js";
 import Nav from "../components/Nav.js";
 
@@ -18,10 +19,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={playfair.variable}>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
+      <Script
+        id="theme-init"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
 (function(){
   try {
     var t = localStorage.getItem("kla-theme");
@@ -32,7 +34,6 @@ export default function RootLayout({ children }) {
 `,
           }}
         />
-      </head>
       <body>
         <Suspense fallback={null}>
           <Nav />
