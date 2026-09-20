@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "../lib/supabase/browser.js";
 import ThemeToggle from "./ThemeToggle.js";
 
 const LINKS = [
@@ -18,12 +19,36 @@ export default function Nav() {
   const [value, setValue] = useState("");
   const timer = useRef(null);
 
+  const [user, setUser] = useState(null);
+
   // Keep the search box in sync with ?q= on the stories page.
   useEffect(() => {
     setValue(searchParams.get("q") || "");
   }, [searchParams]);
 
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  // Track authentication state via Supabase.
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+  };
 
   const go = (next) => {
     const q = next.trim();
@@ -80,6 +105,54 @@ export default function Nav() {
           </form>
 
           <ThemeToggle />
+
+          {user ? (
+            <div className="nav-links">
+              <span
+                style={{
+                  fontFamily: "'Courier New', monospace",
+                  fontSize: "0.75rem",
+                  letterSpacing: "0.08em",
+                  color: "var(--color-text-primary)",
+                  padding: "4px 0",
+                }}
+              >
+                {user.email}
+              </span>
+              <button
+                onClick={handleLogout}
+                style={{
+                  fontFamily: "'Courier New', monospace",
+                  fontSize: "0.75rem",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--color-text-muted)",
+                  background: "none",
+                  border: "none",
+                  padding: "4px 0",
+                  cursor: "pointer",
+                  transition: "var(--transition-base)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--color-accent)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "var(--color-text-muted)";
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <nav className="nav-links" aria-label="Account navigation">
+              <Link href="/login" className="nav-link">
+                Login
+              </Link>
+              <Link href="/signup" className="nav-link">
+                Sign Up
+              </Link>
+            </nav>
+          )}
         </div>
       </div>
     </header>
