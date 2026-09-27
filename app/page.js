@@ -1,11 +1,33 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import collection from "../collection.config.js";
 import EntryCard from "../components/EntryCard.js";
-import entries from "../data/entries.js";
+import { createClient } from "../lib/supabase/browser.js";
 
 export default function Home() {
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("entries")
+      .select("*")
+      .order("year", { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data && data.length > 0) {
+          setEntries(data);
+        }
+        setLoading(false);
+      });
+  }, []);
+
   const sorted = [...entries].sort((a, b) => b.year - a.year);
   const [latest, ...recent] = sorted;
+
+  const hasEntries = !loading && entries.length > 0;
 
   const ruledHeader = (
     <div
@@ -28,7 +50,9 @@ export default function Home() {
           whiteSpace: "nowrap",
         }}
       >
-        The Diary · {entries.length} {entries.length === 1 ? "story" : "stories"}
+        {loading
+          ? "Loading…"
+          : `The Diary · ${entries.length} ${entries.length === 1 ? "story" : "stories"}`}
       </span>
       <hr style={{ flex: 1, border: "none", borderTop: "1px solid var(--color-border)", margin: 0 }} />
     </div>
@@ -90,41 +114,99 @@ export default function Home() {
 
       {ruledHeader}
 
-      {/* Latest story — featured */}
-      <EntryCard
-        title={latest.title}
-        description={latest.description}
-        contributor={latest.contributor}
-        place={latest.place}
-        year={latest.year}
-        featured
-      />
-
-      {/* Recent stories */}
-      <h2
-        style={{
-          fontFamily: "var(--font-display), Georgia, serif",
-          fontSize: "1.375rem",
-          fontWeight: 600,
-          margin: "var(--space-2xl) 0 var(--space-lg)",
-          color: "var(--color-text-primary)",
-        }}
-      >
-        Recent stories
-      </h2>
-
-      <div className="entry-grid">
-        {recent.slice(0, 2).map((entry) => (
+      {loading ? (
+        <div
+          style={{
+            padding: "var(--space-2xl) var(--space-lg)",
+            textAlign: "center",
+            backgroundColor: "var(--color-surface)",
+            border: "1px dashed var(--color-border-strong)",
+            borderRadius: "var(--radius-card)",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "var(--font-display), Georgia, serif",
+              fontSize: "1.125rem",
+              fontWeight: 600,
+              margin: 0,
+              color: "var(--color-text-primary)",
+            }}
+          >
+            Loading stories…
+          </p>
+        </div>
+      ) : !hasEntries ? (
+        <div
+          style={{
+            padding: "var(--space-2xl) var(--space-lg)",
+            textAlign: "center",
+            backgroundColor: "var(--color-surface)",
+            border: "1px dashed var(--color-border-strong)",
+            borderRadius: "var(--radius-card)",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "var(--font-display), Georgia, serif",
+              fontSize: "1.125rem",
+              fontWeight: 600,
+              margin: 0,
+              color: "var(--color-text-primary)",
+            }}
+          >
+            No entries yet
+          </p>
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "var(--color-text-muted)",
+              margin: "var(--space-sm) 0 0",
+              lineHeight: 1.6,
+            }}
+          >
+            Stories will appear here once they are submitted and published.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Latest story — featured */}
           <EntryCard
-            key={entry.title}
-            title={entry.title}
-            description={entry.description}
-            contributor={entry.contributor}
-            place={entry.place}
-            year={entry.year}
+            title={latest.title}
+            description={latest.description}
+            contributor={latest.contributor}
+            place={latest.place}
+            year={latest.year}
+            featured
           />
-        ))}
-      </div>
+
+          {/* Recent stories */}
+          <h2
+            style={{
+              fontFamily: "var(--font-display), Georgia, serif",
+              fontSize: "1.375rem",
+              fontWeight: 600,
+              margin: "var(--space-2xl) 0 var(--space-lg)",
+              color: "var(--color-text-primary)",
+            }}
+          >
+            Recent stories
+          </h2>
+
+          <div className="entry-grid">
+            {recent.slice(0, 2).map((entry) => (
+              <EntryCard
+                key={entry.id}
+                title={entry.title}
+                description={entry.description}
+                contributor={entry.contributor}
+                place={entry.place}
+                year={entry.year}
+              />
+            ))}
+          </div>
+        </>
+      )}
 
       <p style={{ margin: "var(--space-2xl) 0 0" }}>
         <Link

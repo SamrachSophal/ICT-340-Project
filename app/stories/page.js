@@ -1,19 +1,38 @@
-import EntryCard from "../../components/EntryCard.js";
-import entries from "../../data/entries.js";
+"use client";
 
-export default async function StoriesPage({ searchParams }) {
-  const params = await searchParams;
-  const q = typeof params.q === "string" ? params.q.trim() : "";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import EntryCard from "../../components/EntryCard.js";
+import { createClient } from "../../lib/supabase/browser.js";
+
+function StoriesContent() {
+  const searchParams = useSearchParams();
+  const q = typeof searchParams.get("q") === "string" ? searchParams.get("q").trim() : "";
   const query = q.toLowerCase();
 
-  /* Filter entries by search query (title only, case-insensitive). */
-  const filtered = query
-    ? entries.filter((entry) => entry.title.toLowerCase().includes(query))
-    : entries;
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  /* Group filtered entries by year, preserving original array order. */
+  useEffect(() => {
+    setLoading(true);
+    const supabase = createClient();
+    let request = supabase.from("entries").select("*").order("year", { ascending: false });
+
+    if (query) {
+      request = request.ilike("title", `%${query}%`);
+    }
+
+    request.then(({ data, error }) => {
+      if (!error && data && data.length > 0) {
+        setEntries(data);
+      }
+      setLoading(false);
+    });
+  }, [query]);
+
+  /* Group filtered entries by year, preserving the database order. */
   const grouped = {};
-  for (const entry of filtered) {
+  for (const entry of entries) {
     if (!grouped[entry.year]) grouped[entry.year] = [];
     grouped[entry.year].push(entry);
   }
@@ -72,7 +91,7 @@ export default async function StoriesPage({ searchParams }) {
           : "A timeline of family memories, from 2010 to today."}
       </p>
 
-      {years.length === 0 ? (
+      {loading ? (
         <div
           role="status"
           style={{
@@ -92,7 +111,32 @@ export default async function StoriesPage({ searchParams }) {
               color: "var(--color-text-primary)",
             }}
           >
-            No stories match &ldquo;{q}&rdquo;
+            {query ? "Searching…" : "Loading stories…"}
+          </p>
+        </div>
+      ) : years.length === 0 ? (
+        <div
+          role="status"
+          style={{
+            padding: "var(--space-2xl) var(--space-lg)",
+            textAlign: "center",
+            backgroundColor: "var(--color-surface)",
+            border: "1px dashed var(--color-border-strong)",
+            borderRadius: "var(--radius-card)",
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "var(--font-display), Georgia, serif",
+              fontSize: "1.25rem",
+              fontWeight: 600,
+              margin: 0,
+              color: "var(--color-text-primary)",
+            }}
+          >
+            {query
+              ? `No stories match "${q}"`
+              : "No entries yet"}
           </p>
           <p
             style={{
@@ -102,7 +146,9 @@ export default async function StoriesPage({ searchParams }) {
               lineHeight: 1.6,
             }}
           >
-            Try a Khmer or English title, like បុណ្យ or &ldquo;new year&rdquo;.
+            {query
+              ? "Try a Khmer or English title, like បុណ្យ or &ldquo;new year&rdquo;."
+              : "Stories will appear here once they are submitted and published."}
           </p>
         </div>
       ) : (
@@ -140,5 +186,13 @@ export default async function StoriesPage({ searchParams }) {
         2026.
       </footer>
     </main>
+  );
+}
+
+export default function StoriesPage() {
+  return (
+    <Suspense fallback={null}>
+      <StoriesContent />
+    </Suspense>
   );
 }
