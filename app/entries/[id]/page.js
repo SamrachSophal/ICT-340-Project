@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server.js";
+import EntryActions from "../../../components/EntryActions.js";
 
 const mainStyle = {
   maxWidth: 840,
@@ -84,6 +85,12 @@ export default async function EntryPage({ params }) {
     .eq("id", id)
     .maybeSingle();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  // Edit and Delete are only offered to the person who owns the story.
+  const isOwner = user && entry && entry.owner === user.id;
+
   if (error || !entry) {
     return (
       <main style={mainStyle}>
@@ -149,6 +156,8 @@ export default async function EntryPage({ params }) {
           <p style={valueStyle}>{entry.contributor}</p>
         </div>
       </div>
+
+      {isOwner ? <EntryActions entryId={entry.id} /> : null}
 
       <footer style={footerStyle}>
         Built in ICT 340 — Vibe Coding, American University of Phnom Penh, Fall 2026.
