@@ -165,6 +165,7 @@ function StoriesContent() {
                   contributor={entry.contributor}
                   place={entry.place}
                   year={entry.year}
+                  href={`/entries/${entry.id}`}
                 />
               ))}
             </div>

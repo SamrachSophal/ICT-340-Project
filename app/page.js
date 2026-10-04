@@ -178,6 +178,7 @@ export default function Home() {
             place={latest.place}
             year={latest.year}
             featured
+            href={`/entries/${latest.id}`}
           />
 
           {/* Recent stories */}
@@ -202,6 +203,7 @@ export default function Home() {
                 contributor={entry.contributor}
                 place={entry.place}
                 year={entry.year}
+                href={`/entries/${entry.id}`}
               />
             ))}
           </div>

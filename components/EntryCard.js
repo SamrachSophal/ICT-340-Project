@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 const s = {
   number: {
@@ -47,8 +48,15 @@ export default function EntryCard({
   place,
   year,
   featured = false,
+  href,
 }) {
   const [hovered, setHovered] = useState(false);
+
+  const titleLinkStyle = {
+    color: "inherit",
+    textDecoration: hovered ? "underline" : "none",
+    textDecorationColor: "var(--color-accent)",
+  };
 
   const articleBase = {
     position: "relative",
@@ -115,7 +123,7 @@ export default function EntryCard({
             color: "var(--color-text-primary)",
           }}
         >
-          {title}
+          {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
         </h2>
         <p style={s.description}>{description}</p>
         {metaRow}
@@ -147,7 +155,7 @@ export default function EntryCard({
           color: "var(--color-text-primary)",
         }}
       >
-        {title}
+        {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
       </h2>
       <p style={s.description}>{description}</p>
       {metaRow}

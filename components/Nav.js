@@ -8,6 +8,7 @@ import ThemeToggle from "./ThemeToggle.js";
 
 const LINKS = [
   { href: "/", label: "Home" },
+  { href: "/contribute", label: "Contribute" },
   { href: "/about", label: "About" },
   { href: "/stories", label: "All Stories" },
 ];

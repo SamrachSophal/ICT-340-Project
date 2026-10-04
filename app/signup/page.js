@@ -11,6 +11,7 @@ export default function SignupPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,8 +21,13 @@ export default function SignupPage() {
     setError(null);
     setMessage(null);
 
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
       setError("Please fill in all fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -192,6 +198,47 @@ export default function SignupPage() {
               transition: "var(--transition-base)",
             }}
             placeholder="Choose a password"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="confirmPassword"
+            style={{
+              display: "block",
+              fontFamily: "'Courier New', monospace",
+              fontSize: "0.75rem",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--color-text-secondary)",
+              marginBottom: "var(--space-sm)",
+            }}
+          >
+            Confirm password
+          </label>
+          <input
+            id="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={6}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="search-input"
+            style={{
+              width: "100%",
+              padding: "var(--space-md) var(--space-lg)",
+              fontFamily: "inherit",
+              fontSize: "1rem",
+              lineHeight: 1.5,
+              color: "var(--color-text-primary)",
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-card)",
+              boxShadow: "var(--shadow-card)",
+              transition: "var(--transition-base)",
+            }}
+            placeholder="Re-enter your password"
           />
         </div>
 
