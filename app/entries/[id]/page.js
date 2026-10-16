@@ -3,7 +3,7 @@ import { createClient } from "../../../lib/supabase/server.js";
 import EntryActions from "../../../components/EntryActions.js";
 
 const mainStyle = {
-  maxWidth: 840,
+  maxWidth: 1200,
   margin: "0 auto",
   padding: "var(--space-2xl) var(--space-lg)",
 };

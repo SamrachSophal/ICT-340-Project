@@ -19,7 +19,7 @@ const valueStyle = {
 
 export default function AboutPage() {
   return (
-    <main style={{ maxWidth: 840, margin: "0 auto", padding: "var(--space-2xl) var(--space-lg)" }}>
+    <main style={{ maxWidth: 1200, margin: "0 auto", padding: "var(--space-2xl) var(--space-lg)" }}>
       <p
         style={{
           fontFamily: "'Courier New', monospace",
