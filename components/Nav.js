@@ -120,6 +120,9 @@ export default function Nav() {
               >
                 {user.user_metadata?.username || "Anonymous"}
               </span>
+              <Link href="/settings" className="nav-link">
+                Settings
+              </Link>
               <button
                 onClick={handleLogout}
                 style={{
