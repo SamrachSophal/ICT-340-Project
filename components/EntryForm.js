@@ -8,6 +8,21 @@ import {
   CURRENT_YEAR,
 } from "../lib/entryValidation.js";
 
+// A text button that looks like the app's inline links (used for the
+// photo "Remove" / "Keep photo" actions inside the form).
+const linkButtonStyle = {
+  background: "none",
+  border: "none",
+  padding: 0,
+  fontFamily: "inherit",
+  fontSize: "inherit",
+  color: "var(--color-accent)",
+  textDecoration: "none",
+  borderBottom: "1px solid var(--color-accent)",
+  paddingBottom: "2px",
+  cursor: "pointer",
+};
+
 // ============================================================
 //  Shared story form. Both /contribute and /entries/[id]/edit
 //  render this same component, so the two flows always show the
@@ -17,12 +32,13 @@ import {
 //    initialValues — { title, description, place, year, photoUrl }
 //      (photoUrl is the entry's existing cover in edit mode only)
 //    submitLabel / savingLabel — text for the submit button.
-//    onSubmit({ cleaned, photo }) — async helper that performs the
-//      actual save: insert on /contribute, update on /edit. Return a
+//    onSubmit({ cleaned, photo, removePhoto }) — async helper that performs
+//      the actual save: insert on /contribute, update on /edit. Return a
 //      user-facing error message when the save failed, or null on
 //      success (the helper is also responsible for navigating away).
 //      `cleaned` holds trimmed text values; `photo` is the newly
-//      chosen File, or null when none was picked.
+//      chosen File, or null when none was picked; `removePhoto` is true
+//      in edit mode when the owner asked to delete the current photo.
 // ============================================================
 
 export default function EntryForm({
@@ -40,16 +56,18 @@ export default function EntryForm({
     initialValues.year != null ? String(initialValues.year) : "",
   );
   const [photo, setPhoto] = useState(null);
+  // Edit mode only: true once the owner asks to remove the current photo.
+  const [removeCurrentPhoto, setRemoveCurrentPhoto] = useState(false);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const hasCurrentPhoto = Boolean(initialValues.photoUrl);
 
-  const photoHint = photo
-    ? `Chosen: ${photo.name}${hasCurrentPhoto ? " — will replace the current photo" : ""}.`
+  const photoHint = removeCurrentPhoto
+    ? "The current photo will be removed when you save."
     : hasCurrentPhoto
-      ? "Current photo will be kept — choose a new file to replace it."
+      ? "Current photo will be kept — choose a new file to replace it, or remove it."
       : "Optional cover photo — JPG, PNG, or WebP, 5 MB or smaller.";
 
   const handleSubmit = async (e) => {
@@ -73,7 +91,11 @@ export default function EntryForm({
 
     // 2. The caller performs the save. A returned message becomes the
     //    inline form error; null means success.
-    const problem = await onSubmit({ cleaned, photo });
+    const problem = await onSubmit({
+      cleaned,
+      photo,
+      removePhoto: removeCurrentPhoto,
+    });
     if (problem) setFormError(problem);
 
     setSaving(false);
@@ -155,30 +177,95 @@ export default function EntryForm({
       </FormField>
 
       <FormField label="Photo (optional)" htmlFor="photo" error={errors.photo}>
-        {hasCurrentPhoto ? (
-          <img
-            src={initialValues.photoUrl}
-            alt="Current cover photo"
-            style={{
-              display: "block",
-              maxHeight: 180,
-              maxWidth: "100%",
-              marginBottom: "var(--space-sm)",
-              borderRadius: "var(--radius-card)",
-              border: "1px solid var(--color-border)",
-            }}
-          />
+        {/* The existing cover is shown until the owner asks to remove it. */}
+        {hasCurrentPhoto && !removeCurrentPhoto ? (
+          <div style={{ marginBottom: "var(--space-sm)" }}>
+            <img
+              src={initialValues.photoUrl}
+              alt="Current cover photo"
+              style={{
+                display: "block",
+                maxHeight: 180,
+                maxWidth: "100%",
+                borderRadius: "var(--radius-card)",
+                border: "1px solid var(--color-border)",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setPhoto(null);
+                setRemoveCurrentPhoto(true);
+              }}
+              style={{
+                ...linkButtonStyle,
+                marginTop: "var(--space-sm)",
+              }}
+            >
+              Remove photo
+            </button>
+          </div>
         ) : null}
+
+        {/* Once removal is requested, offer an easy Undo before saving. */}
+        {hasCurrentPhoto && removeCurrentPhoto ? (
+          <p
+            style={{
+              fontSize: "0.8125rem",
+              color: "var(--color-text-muted)",
+              margin: "0 0 var(--space-sm)",
+              lineHeight: 1.5,
+            }}
+          >
+            The current photo will be removed when you save.{" "}
+            <button
+              type="button"
+              onClick={() => setRemoveCurrentPhoto(false)}
+              style={linkButtonStyle}
+            >
+              Keep photo
+            </button>
+          </p>
+        ) : null}
+
         <input
           id="photo"
           name="photo"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          onChange={(e) => setPhoto(e.target.files ? e.target.files[0] : null)}
+          onChange={(e) => {
+            const file = e.target.files ? e.target.files[0] : null;
+            setPhoto(file);
+            // Picking a replacement overrides any earlier "remove" choice.
+            if (file) setRemoveCurrentPhoto(false);
+          }}
           className="search-input"
           aria-invalid={errors.photo ? true : undefined}
           aria-describedby={errors.photo ? "photo-error" : undefined}
         />
+
+        {/* A newly chosen file can be cleared again before saving. */}
+        {photo ? (
+          <p
+            style={{
+              fontSize: "0.8125rem",
+              color: "var(--color-text-secondary)",
+              margin: "var(--space-sm) 0 0",
+              lineHeight: 1.5,
+            }}
+          >
+            Chosen: {photo.name}
+            {hasCurrentPhoto ? " — will replace the current photo." : ""}{" "}
+            <button
+              type="button"
+              onClick={() => setPhoto(null)}
+              style={linkButtonStyle}
+            >
+              Remove
+            </button>
+          </p>
+        ) : null}
+
         <p
           style={{
             fontSize: "0.8125rem",

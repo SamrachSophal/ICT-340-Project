@@ -3,16 +3,21 @@
 import { useRouter } from "next/navigation";
 import { createClient } from "../lib/supabase/browser.js";
 import EntryForm from "./EntryForm.js";
-import { uploadEntryPhoto } from "../lib/uploadEntryPhoto.js";
+import {
+  deleteEntryPhoto,
+  uploadEntryPhoto,
+} from "../lib/uploadEntryPhoto.js";
 
 export default function EditEntryForm({ entry, user }) {
   const router = useRouter();
   const supabase = createClient();
 
-  const handleSubmit = async ({ cleaned, photo }) => {
+  const handleSubmit = async ({ cleaned, photo, removePhoto }) => {
     try {
-      // 1. Changing the photo is optional: upload a new one only when
-      //    a file was actually picked. Otherwise keep the existing one.
+      // 1. Photo changes are optional:
+      //    - a new file replaces the current photo,
+      //    - removePhoto clears it (the stored file is deleted after save),
+      //    - otherwise the current photo is kept as-is.
       let photoUrl = entry.photo_url;
       if (photo) {
         photoUrl = await uploadEntryPhoto({
@@ -20,6 +25,8 @@ export default function EditEntryForm({ entry, user }) {
           file: photo,
           userId: user.id,
         });
+      } else if (removePhoto) {
+        photoUrl = null;
       }
 
       // 2. Update only the columns contributors supply. `owner` and
@@ -30,7 +37,13 @@ export default function EditEntryForm({ entry, user }) {
         place: cleaned.place,
         year: cleaned.year,
       };
-      if (photoUrl) row.photo_url = photoUrl;
+      // photo_url is only sent when it changes: a new URL replaces the
+      // current one, and removePhoto clears it back to null.
+      if (photoUrl) {
+        row.photo_url = photoUrl;
+      } else if (removePhoto) {
+        row.photo_url = null;
+      }
 
       // 3. .select() must hand back the updated row. If none came back,
       //    the change was not actually saved.
@@ -47,7 +60,18 @@ export default function EditEntryForm({ entry, user }) {
         return "That change wasn't saved";
       }
 
-      // 4. Land back on the story.
+      // 4. The story no longer points at the old file, so delete the stored
+      //    photo too. This is best-effort cleanup: if it fails, the story is
+      //    still correct, so the problem is only logged.
+      if (removePhoto && entry.photo_url) {
+        try {
+          await deleteEntryPhoto({ supabase, photoUrl: entry.photo_url });
+        } catch (storageError) {
+          console.warn("Stored photo could not be deleted:", storageError);
+        }
+      }
+
+      // 5. Land back on the story.
       router.push(`/entries/${entry.id}`);
       return null;
     } catch (updateError) {
