@@ -10,9 +10,11 @@ export default function ContributeForm({ user }) {
   const supabase = createClient();
 
   // The contributor box starts pre-filled with the signed-in account's
-  // name, but the contributor may change it to credit the actual person
+  // username, but the contributor may change it to credit the actual person
   // who shared the story (for example, an elder telling the memory).
-  const contributor = user.user_metadata?.full_name || user.email;
+  // Accounts without a username fall back to "Anonymous"; the account's
+  // email address is never used as the public contributor name.
+  const contributor = user.user_metadata?.username || "Anonymous";
 
   const handleSubmit = async ({ cleaned, photo }) => {
     // 1. Upload the optional cover photo, then grab its public URL.

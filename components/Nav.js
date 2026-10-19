@@ -118,7 +118,7 @@ export default function Nav() {
                   padding: "4px 0",
                 }}
               >
-                {user.email}
+                {user.user_metadata?.username || "Anonymous"}
               </span>
               <button
                 onClick={handleLogout}

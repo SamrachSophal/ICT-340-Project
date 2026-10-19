@@ -9,6 +9,7 @@ export default function SignupPage() {
   const router = useRouter();
   const supabase = createClient();
 
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,8 +22,25 @@ export default function SignupPage() {
     setError(null);
     setMessage(null);
 
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+    const trimmedUsername = username.trim();
+
+    if (
+      !email.trim() ||
+      !trimmedUsername ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
       setError("Please fill in all fields.");
+      return;
+    }
+
+    if (trimmedUsername.length < 2 || trimmedUsername.length > 50) {
+      setError("Username must be between 2 and 50 characters.");
+      return;
+    }
+
+    if (/[<>]/.test(trimmedUsername)) {
+      setError("Username can't include < or >.");
       return;
     }
 
@@ -36,6 +54,7 @@ export default function SignupPage() {
     const { data, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
+      options: { data: { username: trimmedUsername } },
     });
 
     setLoading(false);
@@ -120,6 +139,47 @@ export default function SignupPage() {
           maxWidth: 400,
         }}
       >
+        <div>
+          <label
+            htmlFor="username"
+            style={{
+              display: "block",
+              fontFamily: "'Courier New', monospace",
+              fontSize: "0.75rem",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--color-text-secondary)",
+              marginBottom: "var(--space-sm)",
+            }}
+          >
+            Username
+          </label>
+          <input
+            id="username"
+            type="text"
+            autoComplete="username"
+            required
+            maxLength={50}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="search-input"
+            style={{
+              width: "100%",
+              padding: "var(--space-md) var(--space-lg)",
+              fontFamily: "inherit",
+              fontSize: "1rem",
+              lineHeight: 1.5,
+              color: "var(--color-text-primary)",
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-card)",
+              boxShadow: "var(--shadow-card)",
+              transition: "var(--transition-base)",
+            }}
+            placeholder="Choose a username"
+          />
+        </div>
+
         <div>
           <label
             htmlFor="email"
