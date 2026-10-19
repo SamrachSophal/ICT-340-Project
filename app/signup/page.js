@@ -54,7 +54,15 @@ export default function SignupPage() {
     const { data, error: authError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { data: { username: trimmedUsername } },
+      options: {
+        // The account's username, stored as user metadata.
+        data: { username: trimmedUsername },
+        // Where the confirmation email should send the user after the link is
+        // clicked. `window.location.origin` is the site the account is being
+        // created from, so production emails always point at the deployed
+        // site (never localhost) while local testing still works.
+        emailRedirectTo: window.location.origin,
+      },
     });
 
     setLoading(false);
