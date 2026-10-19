@@ -29,7 +29,7 @@ const linkButtonStyle = {
 //  same fields and enforce the same validation rules.
 //
 //  Props:
-//    initialValues — { title, description, place, year, photoUrl }
+//    initialValues — { contributor, title, description, place, year, photoUrl }
 //      (photoUrl is the entry's existing cover in edit mode only)
 //    submitLabel / savingLabel — text for the submit button.
 //    onSubmit({ cleaned, photo, removePhoto }) — async helper that performs
@@ -47,6 +47,9 @@ export default function EntryForm({
   savingLabel,
   onSubmit,
 }) {
+  const [contributor, setContributor] = useState(
+    initialValues.contributor ?? "",
+  );
   const [title, setTitle] = useState(initialValues.title ?? "");
   const [description, setDescription] = useState(
     initialValues.description ?? "",
@@ -77,6 +80,7 @@ export default function EntryForm({
 
     // 1. Validate every field; validateEntry trims all text first.
     const { errors: fieldErrors, cleaned } = validateEntry({
+      contributor,
       title,
       description,
       place,
@@ -112,6 +116,28 @@ export default function EntryForm({
         maxWidth: 640,
       }}
     >
+      <FormField
+        label="Contributor name"
+        htmlFor="contributor"
+        error={errors.contributor}
+      >
+        <input
+          id="contributor"
+          name="contributor"
+          type="text"
+          maxLength={100}
+          autoComplete="off"
+          value={contributor}
+          onChange={(e) => setContributor(e.target.value)}
+          className="search-input"
+          placeholder="Who shared this memory?"
+          aria-invalid={errors.contributor ? true : undefined}
+          aria-describedby={
+            errors.contributor ? "contributor-error" : undefined
+          }
+        />
+      </FormField>
+
       <FormField label="Title" htmlFor="title" error={errors.title}>
         <input
           id="title"

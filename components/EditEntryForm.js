@@ -29,13 +29,15 @@ export default function EditEntryForm({ entry, user }) {
         photoUrl = null;
       }
 
-      // 2. Update only the columns contributors supply. `owner` and
-      //    `contributor` are set at creation and never changed by an edit.
+      // 2. Update only the columns contributors supply. `owner` is the
+      //    account that created the entry and is never changed by an edit;
+      //    `contributor` (the credited name) is editable like the rest.
       const row = {
         title: cleaned.title,
         description: cleaned.description,
         place: cleaned.place,
         year: cleaned.year,
+        contributor: cleaned.contributor,
       };
       // photo_url is only sent when it changes: a new URL replaces the
       // current one, and removePhoto clears it back to null.
@@ -83,6 +85,7 @@ export default function EditEntryForm({ entry, user }) {
   return (
     <EntryForm
       initialValues={{
+        contributor: entry.contributor,
         title: entry.title,
         description: entry.description,
         place: entry.place,

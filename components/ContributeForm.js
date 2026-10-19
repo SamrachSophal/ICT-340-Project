@@ -9,7 +9,9 @@ export default function ContributeForm({ user }) {
   const router = useRouter();
   const supabase = createClient();
 
-  // The contributor is the logged-in session user — never a form field.
+  // The contributor box starts pre-filled with the signed-in account's
+  // name, but the contributor may change it to credit the actual person
+  // who shared the story (for example, an elder telling the memory).
   const contributor = user.user_metadata?.full_name || user.email;
 
   const handleSubmit = async ({ cleaned, photo }) => {
@@ -36,7 +38,7 @@ export default function ContributeForm({ user }) {
       place: cleaned.place,
       year: cleaned.year,
       owner: user.id,
-      contributor,
+      contributor: cleaned.contributor,
     };
     if (photoUrl) row.photo_url = photoUrl;
 
@@ -60,6 +62,7 @@ export default function ContributeForm({ user }) {
 
   return (
     <EntryForm
+      initialValues={{ contributor }}
       onSubmit={handleSubmit}
       submitLabel="Contribute story"
       savingLabel="Saving…"
