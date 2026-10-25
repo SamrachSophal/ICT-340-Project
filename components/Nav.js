@@ -120,6 +120,9 @@ export default function Nav() {
               >
                 {user.user_metadata?.username || "Anonymous"}
               </span>
+              <Link href="/my-entries" className="nav-link">
+                My Entries
+              </Link>
               <Link href="/settings" className="nav-link">
                 Settings
               </Link>

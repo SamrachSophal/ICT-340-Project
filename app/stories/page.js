@@ -16,7 +16,14 @@ function StoriesContent() {
   useEffect(() => {
     setLoading(true);
     const supabase = createClient();
-    let request = supabase.from("entries").select("*").order("year", { ascending: false });
+    // The public archive only shows published stories. RLS already keeps
+    // pending rows away from visitors; the filter also keeps the signed-in
+    // user's own pending rows off this public page.
+    let request = supabase
+      .from("entries")
+      .select("*")
+      .eq("status", "published")
+      .order("year", { ascending: false });
 
     if (query) {
       request = request.ilike("title", `%${query}%`);

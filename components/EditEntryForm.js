@@ -29,9 +29,19 @@ export default function EditEntryForm({ entry, user }) {
         photoUrl = null;
       }
 
-      // 2. Update only the columns contributors supply. `owner` is the
+      // 2. Ask the database whether this account is a reviewer. Only a
+      //    reviewer keeps an edited entry published; everyone else's edit
+      //    sends the entry back to "pending" so it waits for review again.
+      //    If the RPC call fails, data is null, which lands on the safe
+      //    path: the entry is not left published.
+      const { data: isReviewer } = await supabase.rpc("is_reviewer");
+
+      // 3. Update only the columns contributors supply. `owner` is the
       //    account that created the entry and is never changed by an edit;
       //    `contributor` (the credited name) is editable like the rest.
+      //    `status` is not a field the author sets: a non-reviewer's edit
+      //    is pinned to "pending", and a reviewer's edit leaves it
+      //    untouched so a published entry stays published.
       const row = {
         title: cleaned.title,
         description: cleaned.description,
@@ -39,6 +49,7 @@ export default function EditEntryForm({ entry, user }) {
         year: cleaned.year,
         contributor: cleaned.contributor,
       };
+      if (!isReviewer) row.status = "pending";
       // photo_url is only sent when it changes: a new URL replaces the
       // current one, and removePhoto clears it back to null.
       if (photoUrl) {
@@ -47,7 +58,7 @@ export default function EditEntryForm({ entry, user }) {
         row.photo_url = null;
       }
 
-      // 3. .select() must hand back the updated row. If none came back,
+      // 4. .select() must hand back the updated row. If none came back,
       //    the change was not actually saved.
       const { data, error: updateError } = await supabase
         .from("entries")
@@ -62,7 +73,7 @@ export default function EditEntryForm({ entry, user }) {
         return "That change wasn't saved";
       }
 
-      // 4. The story no longer points at the old file, so delete the stored
+      // 5. The story no longer points at the old file, so delete the stored
       //    photo too. This is best-effort cleanup: if it fails, the story is
       //    still correct, so the problem is only logged.
       if (removePhoto && entry.photo_url) {
@@ -73,7 +84,7 @@ export default function EditEntryForm({ entry, user }) {
         }
       }
 
-      // 5. Land back on the story.
+      // 6. Land back on the story.
       router.push(`/entries/${entry.id}`);
       return null;
     } catch (updateError) {

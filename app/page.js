@@ -15,6 +15,10 @@ export default function Home() {
     supabase
       .from("entries")
       .select("*")
+      // Only published stories belong on the public home page. (The RLS
+      // policies already hide pending rows from visitors; the filter also
+      // hides the logged-in user's own pending rows, which RLS would show.)
+      .eq("status", "published")
       .order("year", { ascending: false })
       .then(({ data, error }) => {
         if (!error && data && data.length > 0) {
