@@ -224,6 +224,7 @@ function StoriesContent() {
                 place={entry.place}
                 year={entry.year}
                 created_at={entry.created_at}
+                photo_url={entry.photo_url}
                 href={`/entries/${entry.id}`}
               />
             ))}

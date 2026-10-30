@@ -127,17 +127,41 @@ export default async function EntryPage({ params }) {
       <h1 style={h1Style}>{entry.title}</h1>
 
       {entry.photo_url ? (
-        <img
-          src={entry.photo_url}
-          alt={`Cover photo for ${entry.title}`}
+        <figure
           style={{
-            display: "block",
+            margin: "var(--space-lg) 0 0",
             maxWidth: "100%",
-            marginTop: "var(--space-lg)",
-            borderRadius: "var(--radius-card)",
-            border: "1px solid var(--color-border)",
           }}
-        />
+        >
+          {/* The photo is shown here at natural size; clicking it (or the
+              caption) opens the original full-size image in a new tab. */}
+          <a href={entry.photo_url} target="_blank" rel="noopener noreferrer">
+            <img
+              src={entry.photo_url}
+              alt={`Cover photo for ${entry.title}`}
+              style={{
+                display: "block",
+                maxWidth: "100%",
+                borderRadius: "var(--radius-card)",
+                border: "1px solid var(--color-border)",
+              }}
+            />
+          </a>
+          <figcaption
+            style={{
+              fontFamily: "'Courier New', monospace",
+              fontSize: "0.75rem",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--color-text-muted)",
+              margin: "var(--space-sm) 0 0",
+            }}
+          >
+            <a href={entry.photo_url} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+              View full size ↗
+            </a>
+          </figcaption>
+        </figure>
       ) : null}
 
       <p style={descStyle}>{entry.description}</p>

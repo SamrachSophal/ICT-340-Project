@@ -182,6 +182,7 @@ export default function Home() {
             place={latest.place}
             year={latest.year}
             created_at={latest.created_at}
+            photo_url={latest.photo_url}
             featured
             href={`/entries/${latest.id}`}
           />
@@ -209,6 +210,7 @@ export default function Home() {
                 place={entry.place}
                 year={entry.year}
                 created_at={entry.created_at}
+                photo_url={entry.photo_url}
                 href={`/entries/${entry.id}`}
               />
             ))}

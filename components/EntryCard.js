@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import EntryPhoto from "./EntryPhoto.js";
 
 const s = {
   number: {
@@ -63,6 +64,7 @@ export default function EntryCard({
   place,
   year,
   created_at,
+  photo_url,
   featured = false,
   href,
 }) {
@@ -120,6 +122,7 @@ export default function EntryCard({
         onMouseLeave={() => setHovered(false)}
         role="article"
       >
+        <EntryPhoto photo_url={photo_url} title={title} href={href} />
         <div
           style={{
             position: "absolute",
@@ -164,6 +167,7 @@ export default function EntryCard({
       onMouseLeave={() => setHovered(false)}
       role="article"
     >
+      <EntryPhoto photo_url={photo_url} title={title} href={href} />
       <span style={s.number}>{year}</span>
       {/* Clamped to two lines so cards stay the same height regardless of
           title length; the full title is on the story's page. */}
