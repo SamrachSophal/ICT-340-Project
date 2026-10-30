@@ -23,7 +23,9 @@ const s = {
     flexWrap: "wrap",
     gap: "var(--space-xl)",
     paddingTop: "var(--space-md)",
-    marginTop: "var(--space-md)",
+    // Auto margin pins the meta row to the bottom of the card, so every
+    // card in a grid row lines up at the same height.
+    marginTop: "auto",
     borderTop: "1px solid var(--color-border)",
   },
   label: {
@@ -145,6 +147,8 @@ export default function EntryCard({
       role="article"
     >
       <span style={s.number}>{year}</span>
+      {/* Clamped to two lines so cards stay the same height regardless of
+          title length; the full title is on the story's page. */}
       <h2
         style={{
           fontFamily: "var(--font-display), Georgia, serif",
@@ -153,11 +157,27 @@ export default function EntryCard({
           lineHeight: 1.3,
           margin: 0,
           color: "var(--color-text-primary)",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
         }}
       >
         {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
       </h2>
-      <p style={s.description}>{description}</p>
+      {/* Clamped to three lines so cards stay the same height; the full
+          story is one click away on its own page. */}
+      <p
+        style={{
+          ...s.description,
+          display: "-webkit-box",
+          WebkitLineClamp: 3,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}
+      >
+        {description}
+      </p>
       {metaRow}
     </article>
   );

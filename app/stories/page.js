@@ -12,6 +12,9 @@ function StoriesContent() {
 
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
+  // How the flat list is ordered: by time posted (newest first) by default,
+  // or by the year the story happened.
+  const [sort, setSort] = useState("posted");
 
   useEffect(() => {
     setLoading(true);
@@ -37,17 +40,22 @@ function StoriesContent() {
     });
   }, [query]);
 
-  /* Group filtered entries by year, preserving the database order. */
-  const grouped = {};
-  for (const entry of entries) {
-    if (!grouped[entry.year]) grouped[entry.year] = [];
-    grouped[entry.year].push(entry);
-  }
+  /* Safe posted-time milliseconds; a missing or unreadable timestamp sorts
+     last instead of crashing. */
+  const postedAt = (entry) => {
+    if (!entry || !entry.created_at) return 0;
+    const time = new Date(entry.created_at).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
 
-  /* Sort years descending (newest first). */
-  const years = Object.keys(grouped)
-    .map(Number)
-    .sort((a, b) => b - a);
+  /* Flat list, sorted by the chosen mode. The search filter already ran in
+     the effect, so this only orders the filtered set. */
+  const sortedEntries = [...entries].sort((a, b) => {
+    if (sort === "year") {
+      return b.year - a.year || postedAt(b) - postedAt(a);
+    }
+    return postedAt(b) - postedAt(a) || b.year - a.year;
+  });
 
   return (
     <main
@@ -121,7 +129,7 @@ function StoriesContent() {
             {query ? "Searching…" : "Loading stories…"}
           </p>
         </div>
-      ) : years.length === 0 ? (
+      ) : entries.length === 0 ? (
         <div
           role="status"
           style={{
@@ -159,25 +167,67 @@ function StoriesContent() {
           </p>
         </div>
       ) : (
-        /* Each year gets its own independent horizontal rail. */
-        years.map((year) => (
-          <section key={year} className="stories-year">
-            <h2 className="stories-year-heading">{year}</h2>
-            <div className="stories-card-rail">
-              {grouped[year].map((entry) => (
-                <EntryCard
-                  key={entry.id}
-                  title={entry.title}
-                  description={entry.description}
-                  contributor={entry.contributor}
-                  place={entry.place}
-                  year={entry.year}
-                  href={`/entries/${entry.id}`}
-                />
-              ))}
-            </div>
-          </section>
-        ))
+        <>
+          {/* Sort control: time posted (newest first) is the default; the
+              alternative orders by the year the story happened. */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--space-md)",
+              margin: "0 0 var(--space-lg)",
+            }}
+          >
+            <label
+              htmlFor="stories-sort"
+              style={{
+                fontFamily: "'Courier New', monospace",
+                fontSize: "0.75rem",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "var(--color-text-secondary)",
+                margin: 0,
+              }}
+            >
+              Sort by
+            </label>
+            <select
+              id="stories-sort"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              style={{
+                fontFamily: "'Courier New', monospace",
+                fontSize: "0.75rem",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "var(--color-text-primary)",
+                backgroundColor: "var(--color-surface)",
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-card)",
+                padding: "var(--space-sm) var(--space-md)",
+                cursor: "pointer",
+              }}
+            >
+              <option value="posted">Newest first</option>
+              <option value="year">By year</option>
+            </select>
+          </div>
+
+          {/* One flat grid: every card sized the same, no year groups. */}
+          <div className="entry-grid">
+            {sortedEntries.map((entry) => (
+              <EntryCard
+                key={entry.id}
+                title={entry.title}
+                description={entry.description}
+                contributor={entry.contributor}
+                place={entry.place}
+                year={entry.year}
+                href={`/entries/${entry.id}`}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <footer
