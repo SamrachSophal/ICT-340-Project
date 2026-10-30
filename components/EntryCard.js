@@ -43,12 +43,26 @@ const s = {
   },
 };
 
+// Posted time shown on every card. A missing or unreadable timestamp falls
+// back to an em dash so the card still renders and keeps its height.
+const formatPostedDate = (value) => {
+  if (!value) return "\u2014";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "\u2014";
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
 export default function EntryCard({
   title,
   description,
   contributor,
   place,
   year,
+  created_at,
   featured = false,
   href,
 }) {
@@ -79,6 +93,10 @@ export default function EntryCard({
       <div>
         <p style={s.label}>YEAR</p>
         <p style={s.value}>{year}</p>
+      </div>
+      <div>
+        <p style={s.label}>POSTED</p>
+        <p style={s.value}>{formatPostedDate(created_at)}</p>
       </div>
       <div>
         <p style={s.label}>CONTRIBUTOR</p>

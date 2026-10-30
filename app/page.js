@@ -181,6 +181,7 @@ export default function Home() {
             contributor={latest.contributor}
             place={latest.place}
             year={latest.year}
+            created_at={latest.created_at}
             featured
             href={`/entries/${latest.id}`}
           />
@@ -207,6 +208,7 @@ export default function Home() {
                 contributor={entry.contributor}
                 place={entry.place}
                 year={entry.year}
+                created_at={entry.created_at}
                 href={`/entries/${entry.id}`}
               />
             ))}

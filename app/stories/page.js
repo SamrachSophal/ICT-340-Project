@@ -223,6 +223,7 @@ function StoriesContent() {
                 contributor={entry.contributor}
                 place={entry.place}
                 year={entry.year}
+                created_at={entry.created_at}
                 href={`/entries/${entry.id}`}
               />
             ))}
