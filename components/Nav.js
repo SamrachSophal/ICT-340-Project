@@ -21,6 +21,9 @@ export default function Nav() {
   const timer = useRef(null);
 
   const [user, setUser] = useState(null);
+  // True only for reviewer accounts; the Review link in the header is
+  // shown only to them.
+  const [isReviewer, setReviewer] = useState(false);
 
   // Keep the search box in sync with ?q= on the stories page.
   useEffect(() => {
@@ -45,6 +48,20 @@ export default function Nav() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // The Review link is only for reviewers. The check runs on the client
+  // after the session is known; the /review page itself enforces the same
+  // check on the server, so this link is only navigation.
+  useEffect(() => {
+    if (!user) {
+      setReviewer(false);
+      return;
+    }
+    const supabase = createClient();
+    supabase.rpc("is_reviewer").then(({ data }) => {
+      setReviewer(data === true);
+    });
+  }, [user]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -123,6 +140,11 @@ export default function Nav() {
               <Link href="/my-entries" className="nav-link">
                 My Entries
               </Link>
+              {isReviewer ? (
+                <Link href="/review" className="nav-link">
+                  Review
+                </Link>
+              ) : null}
               <Link href="/settings" className="nav-link">
                 Settings
               </Link>
