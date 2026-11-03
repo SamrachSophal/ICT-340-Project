@@ -28,8 +28,32 @@ export default function Home() {
       });
   }, []);
 
-  const sorted = [...entries].sort((a, b) => b.year - a.year);
-  const [latest, ...recent] = sorted;
+  // Safe posted-time milliseconds; a missing or unreadable timestamp sorts
+  // last instead of crashing.
+  const postedAt = (entry) => {
+    if (!entry || !entry.created_at) return 0;
+    const time = new Date(entry.created_at).getTime();
+    return Number.isNaN(time) ? 0 : time;
+  };
+
+  // Featured story: the published entry with the most clicks. Before any
+  // clicks are recorded every entry ties at zero, so the tie-break (newest
+  // posted first) keeps the old "latest story" behaviour.
+  const [featured, ...rest] = [...entries].sort((a, b) => {
+    const clicksDiff = (b.clicks ?? 0) - (a.clicks ?? 0);
+    return clicksDiff !== 0 ? clicksDiff : postedAt(b) - postedAt(a);
+  });
+
+  // How many newest entries appear under the featured story. Kept as a named
+  // constant so the count is tunable in one place instead of a magic number.
+  const NEWEST_COUNT = 4;
+
+  // The newest entries under the featured story, newest posted first. If fewer
+  // than NEWEST_COUNT are published, whatever exists is simply shown — the
+  // page never forces a fixed number of cards.
+  const recent = [...rest]
+    .sort((a, b) => postedAt(b) - postedAt(a) || b.year - a.year)
+    .slice(0, NEWEST_COUNT);
 
   const hasEntries = !loading && entries.length > 0;
 
@@ -174,20 +198,20 @@ export default function Home() {
         </div>
       ) : (
         <>
-          {/* Latest story — featured */}
+          {/* Featured story — the entry with the most clicks */}
           <EntryCard
-            title={latest.title}
-            description={latest.description}
-            contributor={latest.contributor}
-            place={latest.place}
-            year={latest.year}
-            created_at={latest.created_at}
-            photo_url={latest.photo_url}
+            title={featured.title}
+            description={featured.description}
+            contributor={featured.contributor}
+            place={featured.place}
+            year={featured.year}
+            created_at={featured.created_at}
+            photo_url={featured.photo_url}
             featured
-            href={`/entries/${latest.id}`}
+            href={`/entries/${featured.id}`}
           />
 
-          {/* Recent stories */}
+          {/* Newest stories */}
           <h2
             style={{
               fontFamily: "var(--font-display), Georgia, serif",
@@ -197,11 +221,11 @@ export default function Home() {
               color: "var(--color-text-primary)",
             }}
           >
-            Recent stories
+            Newest stories
           </h2>
 
           <div className="entry-grid">
-            {recent.slice(0, 2).map((entry) => (
+            {recent.map((entry) => (
               <EntryCard
                 key={entry.id}
                 title={entry.title}

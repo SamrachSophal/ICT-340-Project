@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server.js";
 import EntryActions from "../../../components/EntryActions.js";
+import EntryClickCounter from "../../../components/EntryClickCounter.js";
 
 const mainStyle = {
   maxWidth: 1200,
@@ -118,6 +119,8 @@ export default async function EntryPage({ params }) {
 
   return (
     <main style={mainStyle}>
+      {/* Counts this visit for the home page's most-clicked featured story. */}
+      <EntryClickCounter entryId={entry.id} />
       <p style={eyebrowStyle}>The Diary</p>
       <p style={{ margin: "0 0 var(--space-sm)" }}>
         <Link href="/stories" style={linkStyle}>
