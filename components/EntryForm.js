@@ -32,6 +32,8 @@ const linkButtonStyle = {
 //    initialValues — { contributor, title, description, place, year, photoUrl }
 //      (photoUrl is the entry's existing cover in edit mode only)
 //    submitLabel / savingLabel — text for the submit button.
+//    hideContributor — true hides the editable contributor box and credits
+//      the story to the account's username (used on /contribute).
 //    onSubmit({ cleaned, photo, removePhoto }) — async helper that performs
 //      the actual save: insert on /contribute, update on /edit. Return a
 //      user-facing error message when the save failed, or null on
@@ -46,6 +48,7 @@ export default function EntryForm({
   submitLabel,
   savingLabel,
   onSubmit,
+  hideContributor = false,
 }) {
   const [contributor, setContributor] = useState(
     initialValues.contributor ?? "",
@@ -116,92 +119,7 @@ export default function EntryForm({
         maxWidth: 640,
       }}
     >
-      <FormField
-        label="Contributor name"
-        htmlFor="contributor"
-        error={errors.contributor}
-      >
-        <input
-          id="contributor"
-          name="contributor"
-          type="text"
-          maxLength={100}
-          autoComplete="off"
-          value={contributor}
-          onChange={(e) => setContributor(e.target.value)}
-          className="search-input"
-          placeholder="Who shared this memory?"
-          aria-invalid={errors.contributor ? true : undefined}
-          aria-describedby={
-            errors.contributor ? "contributor-error" : undefined
-          }
-        />
-      </FormField>
-
-      <FormField label="Title" htmlFor="title" error={errors.title}>
-        <input
-          id="title"
-          name="title"
-          type="text"
-          maxLength={100}
-          autoComplete="off"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="search-input"
-          placeholder="A short headline for this memory"
-          aria-invalid={errors.title ? true : undefined}
-          aria-describedby={errors.title ? "title-error" : undefined}
-        />
-      </FormField>
-
-      <FormField label="Description" htmlFor="description" error={errors.description}>
-        <textarea
-          id="description"
-          name="description"
-          rows={6}
-          maxLength={3000}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="search-input"
-          placeholder="Tell the memory — what happened, who was there, what made it a tradition."
-          aria-invalid={errors.description ? true : undefined}
-          aria-describedby={errors.description ? "description-error" : undefined}
-        />
-      </FormField>
-
-      <FormField label="Place" htmlFor="place" error={errors.place}>
-        <input
-          id="place"
-          name="place"
-          type="text"
-          maxLength={60}
-          autoComplete="off"
-          value={place}
-          onChange={(e) => setPlace(e.target.value)}
-          className="search-input"
-          placeholder="Where did it happen?"
-          aria-invalid={errors.place ? true : undefined}
-          aria-describedby={errors.place ? "place-error" : undefined}
-        />
-      </FormField>
-
-      <FormField label="Year" htmlFor="year" error={errors.year}>
-        <input
-          id="year"
-          name="year"
-          type="number"
-          min={1901}
-          max={CURRENT_YEAR}
-          step={1}
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
-          className="search-input"
-          placeholder={`e.g. ${CURRENT_YEAR}`}
-          aria-invalid={errors.year ? true : undefined}
-          aria-describedby={errors.year ? "year-error" : undefined}
-        />
-      </FormField>
-
+      {/* Photo is the first field so the cover is chosen up front. */}
       <FormField label="Photo (optional)" htmlFor="photo" error={errors.photo}>
         {/* The existing cover is shown until the owner asks to remove it. */}
         {hasCurrentPhoto && !removeCurrentPhoto ? (
@@ -302,6 +220,109 @@ export default function EntryForm({
         >
           {photoHint}
         </p>
+      </FormField>
+
+      {/* On /contribute the contributor box is hidden because the account's
+          username is used automatically. The edit form keeps it editable. */}
+      {hideContributor ? (
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "var(--color-text-secondary)",
+            margin: 0,
+            lineHeight: 1.6,
+          }}
+        >
+          You&rsquo;ll be credited as&nbsp;
+          <strong style={{ color: "var(--color-text-primary)" }}>{contributor}</strong>{" "}
+          in the archive.
+        </p>
+      ) : (
+        <FormField
+          label="Contributor name"
+          htmlFor="contributor"
+          error={errors.contributor}
+        >
+          <input
+            id="contributor"
+            name="contributor"
+            type="text"
+            maxLength={100}
+            autoComplete="off"
+            value={contributor}
+            onChange={(e) => setContributor(e.target.value)}
+            className="search-input"
+            placeholder="Who shared this memory?"
+            aria-invalid={errors.contributor ? true : undefined}
+            aria-describedby={
+              errors.contributor ? "contributor-error" : undefined
+            }
+          />
+        </FormField>
+      )}
+
+      <FormField label="Title" htmlFor="title" error={errors.title}>
+        <input
+          id="title"
+          name="title"
+          type="text"
+          maxLength={100}
+          autoComplete="off"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="search-input"
+          placeholder="A short headline for this memory"
+          aria-invalid={errors.title ? true : undefined}
+          aria-describedby={errors.title ? "title-error" : undefined}
+        />
+      </FormField>
+
+      <FormField label="Description" htmlFor="description" error={errors.description}>
+        <textarea
+          id="description"
+          name="description"
+          rows={6}
+          maxLength={3000}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="search-input"
+          placeholder="Tell the memory — what happened, who was there, what made it a tradition."
+          aria-invalid={errors.description ? true : undefined}
+          aria-describedby={errors.description ? "description-error" : undefined}
+        />
+      </FormField>
+
+      <FormField label="Place" htmlFor="place" error={errors.place}>
+        <input
+          id="place"
+          name="place"
+          type="text"
+          maxLength={60}
+          autoComplete="off"
+          value={place}
+          onChange={(e) => setPlace(e.target.value)}
+          className="search-input"
+          placeholder="Where did it happen?"
+          aria-invalid={errors.place ? true : undefined}
+          aria-describedby={errors.place ? "place-error" : undefined}
+        />
+      </FormField>
+
+      <FormField label="Year" htmlFor="year" error={errors.year}>
+        <input
+          id="year"
+          name="year"
+          type="number"
+          min={1901}
+          max={CURRENT_YEAR}
+          step={1}
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          className="search-input"
+          placeholder={`e.g. ${CURRENT_YEAR}`}
+          aria-invalid={errors.year ? true : undefined}
+          aria-describedby={errors.year ? "year-error" : undefined}
+        />
       </FormField>
 
       {formError && (

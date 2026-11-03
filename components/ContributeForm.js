@@ -16,11 +16,10 @@ const linkStyle = {
 export default function ContributeForm({ user }) {
   const supabase = createClient();
 
-  // The contributor box starts pre-filled with the signed-in account's
-  // username, but the contributor may change it to credit the actual person
-  // who shared the story (for example, an elder telling the memory).
-  // Accounts without a username fall back to "Anonymous"; the account's
-  // email address is never used as the public contributor name.
+  // The contributor is always the signed-in account's username and is not
+  // editable on this form. Accounts without a username fall back to
+  // "Anonymous"; the account's email address is never used as the public
+  // contributor name. The credit can be changed from /settings.
   const contributor = user.user_metadata?.username || "Anonymous";
 
   // Once the insert succeeds, the form is swapped for a review message:
@@ -130,6 +129,7 @@ export default function ContributeForm({ user }) {
       onSubmit={handleSubmit}
       submitLabel="Contribute story"
       savingLabel="Saving…"
+      hideContributor
     />
   );
 }
