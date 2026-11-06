@@ -39,11 +39,12 @@ const s = {
     minWidth: 0,
   },
   // Subtle separator that gives the place block its own section under the
-  // author, keeping the two apart without extra chrome.
+  // author, keeping the two apart without extra chrome. Kept tight so the
+  // sections sit close together and the card stays compact.
   separatedBlock: {
     borderTop: "1px solid var(--color-border)",
-    paddingTop: "var(--space-md)",
-    marginTop: "var(--space-md)",
+    paddingTop: "var(--space-xs)",
+    marginTop: "var(--space-xs)",
     minWidth: 0,
   },
   // One row holding the event and posted dates side by side. flexWrap keeps
@@ -51,8 +52,19 @@ const s = {
   datesRow: {
     display: "flex",
     flexWrap: "wrap",
-    gap: "var(--space-lg)",
+    gap: "var(--space-md)",
     minWidth: 0,
+  },
+  // Wraps everything below the photo. Padding is put on this box (not the
+  // article) so the photo can sit flush against the card's top and side
+  // edges while the text keeps its own breathing room.
+  body: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "var(--space-xs)",
+    padding: "var(--space-md) var(--space-lg) var(--space-lg)",
   },
   title: {
     fontFamily: "var(--font-display), Georgia, serif",
@@ -159,10 +171,9 @@ export default function EntryCard({
       <article
         style={{
           ...articleBase,
-          padding: "var(--space-xl) var(--space-lg)",
+          padding: 0,
           display: "flex",
           flexDirection: "column",
-          gap: "var(--space-sm)",
           overflow: "hidden",
         }}
         onMouseEnter={() => setHovered(true)}
@@ -172,7 +183,8 @@ export default function EntryCard({
         {/* The featured story spans the full page width, so the default 4:3
             frame would grow taller than most screens. 16:9 keeps the hero
             proportional while still lifting the photo far above the old fixed
-            170px landscape strip. */}
+            170px landscape strip. The photo is the first card child with no
+            article padding, so it fills the card's top edge-to-edge. */}
         <EntryPhoto photo_url={photo_url} title={title} href={href} ratio="16 / 9" />
         <div
           style={{
@@ -186,14 +198,16 @@ export default function EntryCard({
             borderBottomLeftRadius: "var(--radius-card)",
           }}
         />
-        <span style={s.label}>FEATURED</span>
-        <h2 style={titleStyle}>
-          {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
-        </h2>
-        {info}
-        {/* Description at the very bottom so the labelled blocks above stay in
-            the requested order. */}
-        <p style={s.description}>{description}</p>
+        <div style={s.body}>
+          <span style={s.label}>FEATURED</span>
+          <h2 style={titleStyle}>
+            {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
+          </h2>
+          {info}
+          {/* Description at the very bottom so the labelled blocks above stay
+              in the requested order. */}
+          <p style={s.description}>{description}</p>
+        </div>
       </article>
     );
   }
@@ -202,23 +216,26 @@ export default function EntryCard({
     <article
       style={{
         ...articleBase,
-        padding: "var(--space-lg)",
+        padding: 0,
         display: "flex",
         flexDirection: "column",
-        gap: "var(--space-sm)",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       role="article"
     >
+      {/* No article padding here either, so the photo fills the card's top
+          edge-to-edge just like the featured card. */}
       <EntryPhoto photo_url={photo_url} title={title} href={href} />
-      <h2 style={titleStyle}>
-        {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
-      </h2>
-      {info}
-      {/* Description at the very bottom; clamped to three lines so cards keep
-          an even height and the full story stays one click away. */}
-      <p style={s.description}>{description}</p>
+      <div style={s.body}>
+        <h2 style={titleStyle}>
+          {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
+        </h2>
+        {info}
+        {/* Description at the very bottom; clamped to three lines so cards
+            keep an even height and the full story stays one click away. */}
+        <p style={s.description}>{description}</p>
+      </div>
     </article>
   );
 }
