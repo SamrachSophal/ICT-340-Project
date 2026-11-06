@@ -5,30 +5,8 @@ import Link from "next/link";
 import EntryPhoto from "./EntryPhoto.js";
 
 const s = {
-  number: {
-    fontFamily: "'Courier New', monospace",
-    fontSize: "0.75rem",
-    color: "var(--color-text-muted)",
-    letterSpacing: "0.08em",
-    margin: 0,
-  },
-  description: {
-    fontSize: "0.9375rem",
-    color: "var(--color-text-secondary)",
-    lineHeight: 1.7,
-    margin: 0,
-    maxWidth: "65ch",
-  },
-  meta: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "var(--space-xl)",
-    paddingTop: "var(--space-md)",
-    // Auto margin pins the meta row to the bottom of the card, so every
-    // card in a grid row lines up at the same height.
-    marginTop: "auto",
-    borderTop: "1px solid var(--color-border)",
-  },
+  // Small uppercase monospace label used above each value (matches the rest
+  // of the archive's labeling pattern).
   label: {
     fontFamily: "'Courier New', monospace",
     fontSize: "0.6875rem",
@@ -37,12 +15,63 @@ const s = {
     textTransform: "uppercase",
     margin: 0,
   },
+  // Value shown beneath a label.
   value: {
     fontSize: "0.875rem",
     color: "var(--color-text-primary)",
     margin: "4px 0 0",
   },
+  // The description sits at the very bottom of the card and keeps a readable
+  // size and line spacing while being clamped so card heights stay even.
+  description: {
+    fontSize: "0.9375rem",
+    color: "var(--color-text-secondary)",
+    lineHeight: 1.7,
+    margin: 0,
+    maxWidth: "65ch",
+    display: "-webkit-box",
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+  },
+  // A labelled key/value pair (label on one line, value on the next).
+  field: {
+    minWidth: 0,
+  },
+  // Subtle separator that gives the place block its own section under the
+  // author, keeping the two apart without extra chrome.
+  separatedBlock: {
+    borderTop: "1px solid var(--color-border)",
+    paddingTop: "var(--space-md)",
+    marginTop: "var(--space-md)",
+    minWidth: 0,
+  },
+  // One row holding the event and posted dates side by side. flexWrap keeps
+  // long dates from escaping the card on narrow screens.
+  datesRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "var(--space-lg)",
+    minWidth: 0,
+  },
+  title: {
+    fontFamily: "var(--font-display), Georgia, serif",
+    fontWeight: 700,
+    lineHeight: 1.3,
+    margin: 0,
+    color: "var(--color-text-primary)",
+    // Clamped to two lines so cards stay the same height regardless of title
+    // length; the full title is on the story's own page.
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+  },
 };
+
+// Missing or optional values fall back to an em dash so the layout keeps its
+// shape no matter what the row actually holds.
+const orDash = (value) => value || "\u2014";
 
 // Posted time shown on every card. A missing or unreadable timestamp falls
 // back to an em dash so the card still renders and keeps its height.
@@ -86,25 +115,43 @@ export default function EntryCard({
     cursor: "default",
   };
 
-  const metaRow = (
-    <div style={s.meta}>
-      <div>
-        <p style={s.label}>PLACE</p>
-        <p style={s.value}>{place}</p>
-      </div>
-      <div>
-        <p style={s.label}>YEAR</p>
-        <p style={s.value}>{year}</p>
-      </div>
-      <div>
-        <p style={s.label}>POSTED</p>
-        <p style={s.value}>{formatPostedDate(created_at)}</p>
-      </div>
-      <div>
+  const titleStyle = {
+    ...s.title,
+    fontSize: featured ? "1.625rem" : "1.25rem",
+  };
+
+  // The labelled blocks between the title and the description, in strict
+  // top-to-bottom order: author, place, then the event / posted date row.
+  const info = (
+    <>
+      {/* Author */}
+      <div style={s.field}>
         <p style={s.label}>CONTRIBUTOR</p>
-        <p style={s.value}>{contributor}</p>
+        <p style={s.value}>{orDash(contributor)}</p>
       </div>
-    </div>
+
+      {/* Place — separated from the author with a subtle divider. */}
+      <div style={s.separatedBlock}>
+        <p style={s.label}>PLACE</p>
+        <p style={s.value}>{orDash(place)}</p>
+      </div>
+
+      {/* Event date and posted date together in one row, kept as separate
+          data properties (year vs. created_at) so "when it happened" is never
+          confused with "when it was submitted". */}
+      <div style={s.separatedBlock}>
+        <div style={s.datesRow}>
+          <div style={s.field}>
+            <p style={s.label}>EVENT</p>
+            <p style={s.value}>{orDash(year)}</p>
+          </div>
+          <div style={s.field}>
+            <p style={s.label}>POSTED</p>
+            <p style={s.value}>{formatPostedDate(created_at)}</p>
+          </div>
+        </div>
+      </div>
+    </>
   );
 
   if (featured) {
@@ -139,21 +186,14 @@ export default function EntryCard({
             borderBottomLeftRadius: "var(--radius-card)",
           }}
         />
-        <span style={s.number}>{year} — FEATURED</span>
-        <h2
-          style={{
-            fontFamily: "var(--font-display), Georgia, serif",
-            fontSize: "1.625rem",
-            fontWeight: 700,
-            lineHeight: 1.3,
-            margin: 0,
-            color: "var(--color-text-primary)",
-          }}
-        >
+        <span style={s.label}>FEATURED</span>
+        <h2 style={titleStyle}>
           {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
         </h2>
+        {info}
+        {/* Description at the very bottom so the labelled blocks above stay in
+            the requested order. */}
         <p style={s.description}>{description}</p>
-        {metaRow}
       </article>
     );
   }
@@ -172,39 +212,13 @@ export default function EntryCard({
       role="article"
     >
       <EntryPhoto photo_url={photo_url} title={title} href={href} />
-      <span style={s.number}>{year}</span>
-      {/* Clamped to two lines so cards stay the same height regardless of
-          title length; the full title is on the story's page. */}
-      <h2
-        style={{
-          fontFamily: "var(--font-display), Georgia, serif",
-          fontSize: "1.25rem",
-          fontWeight: 600,
-          lineHeight: 1.3,
-          margin: 0,
-          color: "var(--color-text-primary)",
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        }}
-      >
+      <h2 style={titleStyle}>
         {href ? <Link href={href} style={titleLinkStyle}>{title}</Link> : title}
       </h2>
-      {/* Clamped to three lines so cards stay the same height; the full
-          story is one click away on its own page. */}
-      <p
-        style={{
-          ...s.description,
-          display: "-webkit-box",
-          WebkitLineClamp: 3,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        }}
-      >
-        {description}
-      </p>
-      {metaRow}
+      {info}
+      {/* Description at the very bottom; clamped to three lines so cards keep
+          an even height and the full story stays one click away. */}
+      <p style={s.description}>{description}</p>
     </article>
   );
 }
