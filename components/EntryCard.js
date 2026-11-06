@@ -122,7 +122,11 @@ export default function EntryCard({
         onMouseLeave={() => setHovered(false)}
         role="article"
       >
-        <EntryPhoto photo_url={photo_url} title={title} href={href} />
+        {/* The featured story spans the full page width, so the default 4:3
+            frame would grow taller than most screens. 16:9 keeps the hero
+            proportional while still lifting the photo far above the old fixed
+            170px landscape strip. */}
+        <EntryPhoto photo_url={photo_url} title={title} href={href} ratio="16 / 9" />
         <div
           style={{
             position: "absolute",

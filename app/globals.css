@@ -78,16 +78,24 @@ body {
 /* ---------- Entry Grid ---------- */
 .entry-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-lg);
 }
 
+/* Tablets: four columns get too narrow for the card text, so step down to a
+   pair of wider cards. */
+@media (max-width: 960px) {
+  .entry-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Phones: a single full-width column per card. */
 @media (max-width: 640px) {
   .entry-grid {
     grid-template-columns: 1fr;
   }
 }
-
 /* ---------- Search Input ---------- */
 .search-input {
   width: 100%;
