@@ -3,12 +3,17 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import EntryCard from "../../components/EntryCard.js";
+import Pagination from "../../components/Pagination.js";
 import { createClient } from "../../lib/supabase/browser.js";
 
 function StoriesContent() {
   const searchParams = useSearchParams();
   const q = typeof searchParams.get("q") === "string" ? searchParams.get("q").trim() : "";
   const query = q.toLowerCase();
+  // The current page comes from the URL (?page=N) so a page is linkable and
+  // survives a reload — the same approach as the existing ?q= search param.
+  // A missing or unreadable value falls back to 1.
+  const pageParam = parseInt(searchParams.get("page"), 10);
 
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +61,28 @@ function StoriesContent() {
     }
     return postedAt(b) - postedAt(a) || b.year - a.year;
   });
+
+  /* Pagination: 20 stories per page, kept as a named constant so the count
+     is tunable in one place. The page number parsed from the URL is clamped
+     into range, so a stale or hand-edited ?page= can never show an empty
+     grid. */
+  const PAGE_SIZE = 20;
+  const totalPages = Math.max(1, Math.ceil(sortedEntries.length / PAGE_SIZE));
+  const safePage = Number.isNaN(pageParam) ? 1 : Math.max(1, pageParam);
+  const currentPage = Math.min(totalPages, safePage);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageEntries = sortedEntries.slice(pageStart, pageStart + PAGE_SIZE);
+
+  /* Page links keep the active search (?q=) and swap only the page number.
+     Page 1 drops the param entirely, so a fresh search from the nav bar
+     (which links to /stories?q=...) naturally lands on page 1. */
+  const buildPageHref = (page) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (page > 1) params.set("page", String(page));
+    const querystring = params.toString();
+    return querystring ? `/stories?${querystring}` : "/stories";
+  };
 
   return (
     <main
@@ -215,7 +242,7 @@ function StoriesContent() {
 
           {/* One flat grid: every card sized the same, no year groups. */}
           <div className="entry-grid">
-            {sortedEntries.map((entry) => (
+            {pageEntries.map((entry) => (
               <EntryCard
                 key={entry.id}
                 title={entry.title}
@@ -229,6 +256,14 @@ function StoriesContent() {
               />
             ))}
           </div>
+
+          {/* Jump between pages. Shown only when the results actually span
+              more than one page (Pagination itself returns nothing early). */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            buildHref={buildPageHref}
+          />
         </>
       )}
 
