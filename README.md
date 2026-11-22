@@ -114,6 +114,6 @@ Answered against the actual grading checklist. Items that depend on a test you r
 - **Reflection pasted in the Canvas submission** — **Yes.**
 - **Posted in the Show Your Archive discussion** — **Yes.**
 
-**Before you hit submit:** commit and push this README (`git add README.md && git commit -m "final README" && git push` — the GitHub repo still shows the starter), fill in the `(fill in)` markers above, and fix the About-page placeholders in `data/about.js`.
+**Before you hit submit:** fill in the remaining `(fill in)` markers above — the two test dates, the entry count, the phone-test device or width, the Supabase awake date, and the demo video link — then add the reflection and Show Your Archive post in Canvas.
 
 
